@@ -79,7 +79,8 @@ parfor ii = 1:6
         % ub,lb: upper baseline and the lower baseline
         ub = min(size(vehtraj,1),ind+40);
         lb = max(1, ind-40);
-        % 6:laneId,7:lateral maneuver
+        % 6:laneId,7:lateral maneuver,8:longitudinal maneuver;
+        % lateral maneuver: left and right lane changing and lane keeping
         if vehtraj(ub,6)>vehtraj(ind,6) || vehtraj(ind,6)>vehtraj(lb,6)
             traj{ii}(k,7) = 3;
         elseif vehtraj(ub,6)<vehtraj(ind,6) || vehtraj(ind,6)<vehtraj(lb,6)
@@ -95,8 +96,11 @@ parfor ii = 1:6
         if ub==ind || lb ==ind
             traj{ii}(k,8) =1;
         else
+            % actual speed
             vHist = (vehtraj(ind,5)-vehtraj(lb,5))/(ind-lb);
+            % future position
             vFut = (vehtraj(ub,5)-vehtraj(ind,5))/(ub-ind);
+            % 定义刹车的动作
             if vFut/vHist <0.8
                 traj{ii}(k,8) =2;
             else
@@ -105,7 +109,7 @@ parfor ii = 1:6
         end
         
         
-        % Get grid locations:
+        % Get grid locations: 在文中的5.5 中有讲解
         frameEgo = traj{ii}(traj{ii}(:,1)==dsId & traj{ii}(:,3)==time & traj{ii}(:,6) == lane,:);
         frameL = traj{ii}(traj{ii}(:,1)==dsId & traj{ii}(:,3)==time & traj{ii}(:,6) == lane-1,:);
         frameR = traj{ii}(traj{ii}(:,1)==dsId & traj{ii}(:,3)==time & traj{ii}(:,6) == lane+1,:);
